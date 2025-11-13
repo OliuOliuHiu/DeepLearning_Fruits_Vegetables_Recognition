@@ -127,6 +127,7 @@ dlba/
 │
 ├── docker-compose.yml
 ├── fruit_vegetable_recognition_train_model.ipynb
+├── link_dataset_model.txt      # link model h5 and data used for train test model
 ├── README.md
 └── REBUILD_DOCKER.md
 ```
