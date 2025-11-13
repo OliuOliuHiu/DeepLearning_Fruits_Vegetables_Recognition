@@ -1,110 +1,96 @@
-# 🔄 Hướng dẫn Rebuild Docker sau khi sửa code
+# 🔄 Rebuilding Docker After Code Changes
 
-## ❌ Vấn đề
+When code lives inside the container image, Docker keeps running the old build until you rebuild. Use the commands below to make sure your latest changes are running.
 
-Khi chạy `docker compose down` rồi `docker compose up` lại, code vẫn như cũ vì:
-- Code được **COPY vào image** khi build (không phải mount)
-- Docker sử dụng **image cũ** đã build trước đó
-- Cần **rebuild** để tạo image mới với code mới
+---
 
-## ✅ Giải pháp
+## 🙅‍♂️ Why `docker compose up` is not enough
 
-### Cách 1: Rebuild tất cả (Khuyến nghị)
+- Your backend and frontend code are **copied into the image during build**.
+- Running `docker compose down` / `up` without rebuilding reuses the **previous image**.
+- Rebuild whenever Python/TypeScript code changes.
 
+---
+
+## ✅ Solutions
+
+### 1. Rebuild everything (recommended)
 ```bash
-# Dừng và xóa containers
 docker compose down
-
-# Rebuild tất cả images (không dùng cache)
 docker compose build --no-cache
-
-# Chạy lại
 docker compose up -d
 ```
 
-### Cách 2: Rebuild chỉ backend và frontend
-
+### 2. Rebuild only backend & frontend
 ```bash
-# Dừng containers
 docker compose down
-
-# Rebuild chỉ backend và frontend
 docker compose build --no-cache backend frontend
-
-# Chạy lại
 docker compose up -d
 ```
 
-### Cách 3: Rebuild và chạy cùng lúc
-
+### 3. One-liner rebuild
 ```bash
 docker compose down
 docker compose up --build -d
 ```
 
-## 🔍 Kiểm tra code mới đã được áp dụng
+---
 
-### Kiểm tra Backend:
+## 🔍 Verify the new code is live
 
+### Backend
 ```bash
-# Xem logs backend
 docker compose logs backend | head -20
-
-# Hoặc vào container kiểm tra
-docker exec -it dlba-backend cat /app/main.py | grep "get_unique_fruits"
+# or jump into the container
+docker exec -it dlba-backend ls /app
 ```
 
-### Kiểm tra Frontend:
-
+### Frontend
 ```bash
-# Xem logs frontend
 docker compose logs frontend | head -20
-
-# Hoặc vào container kiểm tra
-docker exec -it dlba-frontend ls -la /app/src/pages/
+# or inspect the source files
+docker exec -it dlba-frontend ls /app/src/pages
 ```
 
-## 📝 Lưu ý quan trọng
+---
 
-1. **Model folder được mount**: Folder `model/` được mount vào container, nên thay đổi file model **KHÔNG CẦN** rebuild, chỉ cần restart:
+## 📝 Important notes
+
+1. **Model folder is mounted** → changes inside `./model` go straight into the container. Just restart the backend:
    ```bash
    docker compose restart backend
    ```
-
-2. **Code cần rebuild**: Mỗi khi sửa code Python hoặc TypeScript, **PHẢI** rebuild:
+2. **Code changes require rebuilds** → backend or frontend edits need:
    ```bash
    docker compose build --no-cache backend frontend
    docker compose up -d
    ```
+3. **Cache** → use `--no-cache` to avoid Docker reusing stale layers.
 
-3. **Cache Docker**: Dùng `--no-cache` để đảm bảo build lại từ đầu, không dùng cache cũ.
+---
 
-## 🚀 Workflow khuyến nghị
-
+## 🚀 Suggested workflow
 ```bash
-# 1. Sửa code
-# ... sửa code trong back-end/ hoặc front-end/ ...
-
-# 2. Rebuild và chạy
+# edit code in back-end/ or front-end/
 docker compose down
 docker compose build --no-cache backend frontend
 docker compose up -d
-
-# 3. Kiểm tra logs
 docker compose logs -f backend
 docker compose logs -f frontend
 ```
 
-## ⚡ Quick commands
+---
 
+## ⚡ Handy shortcuts
 ```bash
-# Rebuild tất cả và chạy
+# Rebuild everything and restart
 docker compose down && docker compose build --no-cache && docker compose up -d
 
-# Chỉ rebuild backend
+# Only backend
 docker compose build --no-cache backend && docker compose up -d backend
 
-# Chỉ rebuild frontend  
+# Only frontend
 docker compose build --no-cache frontend && docker compose up -d frontend
 ```
 
+Happy shipping! 🧑‍💻
