@@ -46,7 +46,7 @@ FastAPI + React app that classifies images into fruit or vegetable, stores predi
 
 ```bash
 # 1. Clone the repository
-git clone https://github.com/your-org/dlba.git
+git clone https://github.com/OliuOliuHiu/DeepLearning_Fruits_Vegetables_Recognition.git
 cd dlba
 
 # 2. Ensure model files are present in ./model (see section above)
