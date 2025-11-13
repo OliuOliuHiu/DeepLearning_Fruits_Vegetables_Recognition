@@ -9,6 +9,12 @@ interface EnhancedResultCardProps {
 export function EnhancedResultCard({
   result
 }: EnhancedResultCardProps) {
+  const tagLabel =
+    result.tag === 'vegetable'
+      ? 'Vegetable'
+      : result.tag === 'fruit'
+      ? 'Fruit'
+      : 'Unknown';
   return (
     <div className="bg-white dark:bg-gray-800 rounded-3xl shadow-xl p-8 animate-[fadeIn_0.5s_ease-in]">
       <div className="text-center mb-8">
@@ -19,6 +25,10 @@ export function EnhancedResultCard({
         <h2 className="text-5xl font-bold bg-gradient-to-r from-green-600 to-orange-500 bg-clip-text text-transparent mb-4">
           {result.fruitName}
         </h2>
+        <div className="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-gray-700 rounded-full">
+          <span className="text-sm font-semibold text-gray-700 dark:text-gray-200">Tag:</span>
+          <span className="text-sm text-gray-600 dark:text-gray-300">{tagLabel}</span>
+        </div>
       </div>
       <div className="mb-8">
         <div className="flex items-center justify-between mb-3">

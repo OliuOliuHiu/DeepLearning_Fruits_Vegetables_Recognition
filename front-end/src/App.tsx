@@ -1,10 +1,9 @@
 import React, { useState } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import { Layout } from './components/Layout';
-import { HomePage } from './pages/HomePage';
+import { PredictPage } from './pages/PredictPage';
 import { FruitInfoPage } from './pages/FruitInfoPage';
 import { PredictionHistoryPage } from './pages/PredictionHistoryPage';
-import { BatchUploadPage } from './pages/BatchUploadPage';
 import { SettingsPage } from './pages/SettingsPage';
 import { DashboardPage } from './pages/DashboardPage';
 export interface PredictionResult {
@@ -13,6 +12,7 @@ export interface PredictionResult {
   confidence: number;
   imageUrl: string;
   timestamp: Date;
+  tag: 'fruit' | 'vegetable' | 'unknown';
   nutritionalFacts: {
     calories: number;
     carbs: string;
@@ -32,11 +32,10 @@ export interface PredictionResult {
 export function App() {
   return <Layout>
       <Routes>
-        <Route path="/" element={<HomePage />} />
+        <Route path="/" element={<PredictPage />} />
         <Route path="/dashboard" element={<DashboardPage />} />
         <Route path="/fruit-info" element={<FruitInfoPage />} />
         <Route path="/history" element={<PredictionHistoryPage />} />
-        <Route path="/batch" element={<BatchUploadPage />} />
         <Route path="/settings" element={<SettingsPage />} />
       </Routes>
     </Layout>;

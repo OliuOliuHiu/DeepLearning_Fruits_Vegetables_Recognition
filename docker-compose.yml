@@ -47,6 +47,8 @@ services:
       - MONGODB_COLLECTION=predictions
     ports:
       - "8000:8000"
+    volumes:
+      - ./model:/model:ro
     depends_on:
       mongo:
         condition: service_healthy

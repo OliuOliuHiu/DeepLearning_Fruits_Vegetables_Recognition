@@ -1,97 +1,99 @@
-import React, { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { SearchIcon } from 'lucide-react';
-import { CategoryBadge } from '../components/CategoryBadge';
+import { API_BASE_URL } from '../config';
+import { getFruitIcon } from '../utils/fruitIcons';
+
 export function FruitInfoPage() {
   const [searchTerm, setSearchTerm] = useState('');
-  const fruits = [{
-    name: 'Apple',
-    emoji: '🍎',
-    category: 'Pome Fruit',
-    calories: 95,
-    vitaminC: '14% DV'
-  }, {
-    name: 'Banana',
-    emoji: '🍌',
-    category: 'Tropical',
-    calories: 105,
-    vitaminC: '17% DV'
-  }, {
-    name: 'Orange',
-    emoji: '🍊',
-    category: 'Citrus',
-    calories: 62,
-    vitaminC: '116% DV'
-  }, {
-    name: 'Strawberry',
-    emoji: '🍓',
-    category: 'Berry',
-    calories: 49,
-    vitaminC: '149% DV'
-  }, {
-    name: 'Grapes',
-    emoji: '🍇',
-    category: 'Berry',
-    calories: 104,
-    vitaminC: '27% DV'
-  }, {
-    name: 'Watermelon',
-    emoji: '🍉',
-    category: 'Berry',
-    calories: 46,
-    vitaminC: '21% DV'
-  }, {
-    name: 'Pineapple',
-    emoji: '🍍',
-    category: 'Tropical',
-    calories: 82,
-    vitaminC: '131% DV'
-  }, {
-    name: 'Mango',
-    emoji: '🥭',
-    category: 'Tropical',
-    calories: 99,
-    vitaminC: '67% DV'
-  }];
-  const filteredFruits = fruits.filter(fruit => fruit.name.toLowerCase().includes(searchTerm.toLowerCase()));
-  return <div>
+  const [fruits, setFruits] = useState<string[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchFruits = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const response = await fetch(`${API_BASE_URL}/fruits`);
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        const data = await response.json();
+        setFruits(data.fruits || []);
+      } catch (err: any) {
+        console.error('Error fetching fruits:', err);
+        setError(err?.message || 'Failed to load fruits');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchFruits();
+  }, []);
+
+  const filteredFruits = fruits.filter(fruit => 
+    fruit.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-gray-600">Loading fruits...</div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-red-600">{error}</div>
+      </div>
+    );
+  }
+
+  return (
+    <div>
       <div className="mb-8">
         <h1 className="text-4xl font-bold bg-gradient-to-r from-green-600 to-orange-500 bg-clip-text text-transparent mb-2">
           Fruit Information Database
         </h1>
-        <p className="text-gray-600">
-          Explore nutritional information for various fruits
+        <p className="text-gray-600 dark:text-gray-400">
+          Explore fruits that have been predicted in the system
         </p>
       </div>
-      <div className="bg-white rounded-3xl shadow-xl p-8 mb-8">
+      <div className="bg-white dark:bg-gray-800 rounded-3xl shadow-xl p-8 mb-8">
         <div className="relative">
           <SearchIcon className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-          <input type="text" placeholder="Search fruits..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="w-full pl-12 pr-4 py-4 border-2 border-gray-200 rounded-xl focus:border-green-500 focus:outline-none text-gray-700" />
+          <input 
+            type="text" 
+            placeholder="Search fruits..." 
+            value={searchTerm} 
+            onChange={e => setSearchTerm(e.target.value)} 
+            className="w-full pl-12 pr-4 py-4 border-2 border-gray-200 dark:border-gray-700 rounded-xl focus:border-green-500 focus:outline-none text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800" 
+          />
         </div>
       </div>
-      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredFruits.map(fruit => <div key={fruit.name} className="bg-white rounded-2xl shadow-lg p-6 hover:shadow-xl transition-all transform hover:scale-105 cursor-pointer">
-            <div className="text-6xl mb-4 text-center">{fruit.emoji}</div>
-            <h3 className="text-2xl font-bold text-gray-800 mb-2 text-center">
-              {fruit.name}
-            </h3>
-            <div className="flex justify-center mb-4">
-              <CategoryBadge category={fruit.category} />
+      {filteredFruits.length === 0 ? (
+        <div className="bg-white dark:bg-gray-800 rounded-3xl shadow-xl p-16 text-center">
+          <p className="text-gray-500 dark:text-gray-400">
+            {searchTerm ? 'No fruits found matching your search.' : 'No fruits in database yet.'}
+          </p>
+        </div>
+      ) : (
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredFruits.map(fruit => (
+            <div 
+              key={fruit} 
+              className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 hover:shadow-xl transition-all transform hover:scale-105 cursor-pointer"
+            >
+              <div className="text-6xl mb-4 text-center">{getFruitIcon(fruit)}</div>
+              <h3 className="text-2xl font-bold text-gray-800 dark:text-gray-200 mb-2 text-center capitalize">
+                {fruit}
+              </h3>
             </div>
-            <div className="space-y-2 bg-gray-50 rounded-xl p-4">
-              <div className="flex justify-between">
-                <span className="text-gray-600">Calories</span>
-                <span className="font-semibold text-gray-800">
-                  {fruit.calories} kcal
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-600">Vitamin C</span>
-                <span className="font-semibold text-gray-800">
-                  {fruit.vitaminC}
-                </span>
-              </div>
-            </div>
-          </div>)}
-      </div>
-    </div>;
+          ))}
+        </div>
+      )}
+    </div>
+  );
 }

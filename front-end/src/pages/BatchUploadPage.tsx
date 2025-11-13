@@ -3,6 +3,27 @@ import { UploadIcon, Loader2Icon } from 'lucide-react';
 import { PredictionResult } from '../App';
 import { BatchResultsTable } from '../components/BatchResultsTable';
 import { API_BASE_URL } from '../config';
+
+type PredictionTag = 'fruit' | 'vegetable' | 'unknown';
+
+const normalizeTag = (value: unknown): PredictionTag => {
+  const normalized = typeof value === 'string' ? value.trim().toLowerCase() : '';
+  if (normalized === 'fruit' || normalized === 'vegetable') {
+    return normalized;
+  }
+  return 'unknown';
+};
+
+const tagToCategory = (tag: PredictionTag): string => {
+  switch (tag) {
+    case 'vegetable':
+      return 'Vegetable';
+    case 'fruit':
+      return 'Fruit';
+    default:
+      return 'General';
+  }
+};
 interface FileWithPreview {
   file: File;
   preview: string;
@@ -76,36 +97,38 @@ export function BatchUploadPage() {
         .filter((r: any) => r.result && !r.error) // Chỉ lấy kết quả thành công
         .map((result: any, index: number) => {
           const preview = fileMap.get(result.filename) || '';
-        return {
-          id: result.duplicate_info?.id || `${Date.now()}-${index}`,
+          const tag = normalizeTag(result.result?.tag);
+          return {
+            id: result.duplicate_info?.id || `${Date.now()}-${index}`,
             fruitName: result.result.label || 'Unknown',
-            confidence: Number(((result.result.confidence ?? 0) * 100).toFixed(1)),
+            confidence: Number((result.result.confidence ?? 0) * 100),
             imageUrl: preview,
-          timestamp: new Date(),
-          nutritionalFacts: {
+            timestamp: new Date(),
+            tag,
+            nutritionalFacts: {
               calories: 0,
               carbs: '0g',
               sugar: '0g',
               vitaminC: '0% DV',
               fiber: '0g'
-          },
-          priceEstimation: {
+            },
+            priceEstimation: {
               perKg: 0,
               perFruit: 0,
-            currency: 'USD'
-          },
-          similarFruits: [],
-          funFact: '',
-            category: 'General'
-        };
-      });
+              currency: 'USD'
+            },
+            similarFruits: [],
+            funFact: '',
+            category: tagToCategory(tag)
+          };
+        });
       
       setPredictions(newPredictions);
       
       // Show summary with duplicate info
       let message = `Processed ${data.success} out of ${data.total} images successfully.`;
       if (data.duplicates > 0) {
-        message += `\n⚠️ ${data.duplicates} duplicate image(s) detected. New records were created.`;
+        message += `\n ${data.duplicates} duplicate image(s) detected. New records were created.`;
       }
       if (data.success < data.total) {
         message += `\nSome images may have failed.`;
