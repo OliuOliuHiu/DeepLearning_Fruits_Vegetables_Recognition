@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { HomeIcon, BookOpenIcon, ClockIcon, LayersIcon, SettingsIcon, AppleIcon, BarChart3Icon } from 'lucide-react';
+import { HomeIcon, BookOpenIcon, ClockIcon, SettingsIcon, AppleIcon, BarChart3Icon } from 'lucide-react';
 export function Sidebar() {
   const location = useLocation();
   const navItems = [{
@@ -19,10 +19,6 @@ export function Sidebar() {
     path: '/history',
     icon: ClockIcon,
     label: 'Prediction History'
-  }, {
-    path: '/batch',
-    icon: LayersIcon,
-    label: 'Batch Upload'
   }, {
     path: '/settings',
     icon: SettingsIcon,

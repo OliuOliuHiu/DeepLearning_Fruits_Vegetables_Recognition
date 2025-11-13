@@ -79,6 +79,7 @@ def check_duplicate(image_bytes: bytes) -> Optional[Dict[str, Any]]:
 				"filename": existing.get("filename"),
 				"predicted_label": existing.get("predicted_label"),
 				"confidence": existing.get("confidence"),
+				"predicted_tag": existing.get("predicted_tag"),
 				"created_at": existing.get("created_at").isoformat() if existing.get("created_at") else None,
 			}
 		return None
@@ -92,6 +93,7 @@ def save_prediction(
 	image_bytes: bytes,
 	label: str,
 	confidence: float,
+	tag: str | None = None,
 	extra: Dict[str, Any] | None = None,
 	update_existing: bool = False,
 ) -> Tuple[str, bool]:
@@ -124,6 +126,7 @@ def save_prediction(
 				"filename": filename,
 				"predicted_label": label,
 				"confidence": confidence,
+				"predicted_tag": tag,
 				"updated_at": datetime.now(timezone.utc),
 			}
 			if extra:
@@ -143,6 +146,7 @@ def save_prediction(
 				"filename": filename,
 				"predicted_label": label,
 				"confidence": confidence,
+				"predicted_tag": tag,
 				"image_hash": image_hash,
 				"duplicate_of": str(existing["_id"]),  # Reference to original record
 				"created_at": datetime.now(timezone.utc),
@@ -163,6 +167,7 @@ def save_prediction(
 			"filename": filename,
 			"predicted_label": label,
 			"confidence": confidence,
+			"predicted_tag": tag,
 			"image_base64": encoded_image,
 			"image_hash": image_hash,
 			"created_at": datetime.now(timezone.utc),
@@ -213,6 +218,7 @@ def get_history(limit: int = 50) -> List[Dict[str, Any]]:
 				"filename": doc.get("filename"),
 				"predicted_label": doc.get("predicted_label"),
 				"confidence": doc.get("confidence"),
+				"predicted_tag": doc.get("predicted_tag"),
 				"image_base64": image_base64,
 				"created_at": doc.get("created_at").isoformat() if doc.get("created_at") else None,
 				"meta": doc.get("meta"),
@@ -348,6 +354,27 @@ def get_analytics() -> Dict[str, Any]:
 	except Exception as e:
 		print(f"Error getting analytics: {e}")
 		return {}
+
+
+def get_unique_fruits() -> List[str]:
+	"""Get list of unique fruit names from database.
+	
+	Returns:
+		List of unique fruit names (predicted_label)
+	"""
+	try:
+		collection = _get_collection()
+		
+		# Get distinct predicted_label values
+		unique_labels = collection.distinct("predicted_label")
+		
+		# Filter out None/empty values and sort
+		fruits = sorted([label for label in unique_labels if label])
+		
+		return fruits
+	except Exception as e:
+		print(f"Error getting unique fruits: {e}")
+		return []
 
 
 def delete_predictions(prediction_ids: List[str]) -> int:

@@ -1,8 +1,28 @@
 import { useEffect, useState } from 'react';
 import { ClockIcon, TrashIcon, CheckSquareIcon, SquareIcon } from 'lucide-react';
 import { PredictionResult } from '../App';
-import { CategoryBadge } from '../components/CategoryBadge';
 import { API_BASE_URL } from '../config';
+
+type PredictionTag = 'fruit' | 'vegetable' | 'unknown';
+
+const normalizeTag = (value: unknown): PredictionTag => {
+  const normalized = typeof value === 'string' ? value.trim().toLowerCase() : '';
+  if (normalized === 'fruit' || normalized === 'vegetable') {
+    return normalized;
+  }
+  return 'unknown';
+};
+
+const tagToCategory = (tag: PredictionTag): string => {
+  switch (tag) {
+    case 'vegetable':
+      return 'Vegetable';
+    case 'fruit':
+      return 'Fruit';
+    default:
+      return 'General';
+  }
+};
 
 export function PredictionHistoryPage() {
   const [history, setHistory] = useState<PredictionResult[]>([]);
@@ -30,17 +50,19 @@ export function PredictionHistoryPage() {
           const contentType = d.meta?.content_type || 'image/jpeg';
           imageUrl = `data:${contentType};base64,${d.image_base64}`;
         }
+        const tag = normalizeTag(d.predicted_tag);
         return {
           id: String(d.id || d._id || Date.now()),
           fruitName: String(d.predicted_label || 'Unknown'),
-          confidence: Number(((d.confidence ?? 0) * 100).toFixed(1)),
+          confidence: Number((d.confidence ?? 0) * 100),
           imageUrl: imageUrl,
           timestamp: d.created_at ? new Date(d.created_at) : new Date(),
+          tag,
           nutritionalFacts: { calories: 0, carbs: '0g', sugar: '0g', vitaminC: '0% DV', fiber: '0g' },
           priceEstimation: { perKg: 0, perFruit: 0, currency: 'USD' },
           similarFruits: [],
           funFact: '',
-          category: 'General',
+          category: tagToCategory(tag),
         };
       });
       setHistory(mapped);
@@ -189,7 +211,6 @@ export function PredictionHistoryPage() {
                       <h3 className="text-xl font-bold text-gray-800 dark:text-gray-200">
                         {prediction.fruitName}
                       </h3>
-                      <CategoryBadge category={prediction.category} />
                     </div>
                     <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 mb-3">
                       <ClockIcon className="w-4 h-4" />
@@ -197,17 +218,21 @@ export function PredictionHistoryPage() {
                         {new Date(prediction.timestamp).toLocaleString()}
                       </span>
                     </div>
-                    <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-6">
                       <div>
-                        <p className="text-xs text-gray-500 dark:text-gray-400">Confidence</p>
-                        <p className="font-semibold text-green-600 dark:text-green-400">
-                          {prediction.confidence.toFixed(1)}%
+                        <p className="text-xs text-gray-500 dark:text-gray-400">Tag</p>
+                        <p className="font-semibold text-gray-700 dark:text-gray-200">
+                          {prediction.tag === 'vegetable'
+                            ? 'Vegetable'
+                            : prediction.tag === 'fruit'
+                            ? 'Fruit'
+                            : 'Unknown'}
                         </p>
                       </div>
                       <div>
-                        <p className="text-xs text-gray-500 dark:text-gray-400">Price/Kg</p>
-                        <p className="font-semibold text-orange-600 dark:text-orange-400">
-                          ${prediction.priceEstimation.perKg.toFixed(2)}
+                        <p className="text-xs text-gray-500 dark:text-gray-400">Confidence</p>
+                        <p className="font-semibold text-green-600 dark:text-green-400">
+                          {prediction.confidence.toFixed(2)}%
                         </p>
                       </div>
                     </div>

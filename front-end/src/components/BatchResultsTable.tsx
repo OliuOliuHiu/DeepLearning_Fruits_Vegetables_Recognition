@@ -1,6 +1,4 @@
-import React from 'react';
 import { PredictionResult } from '../App';
-import { CategoryBadge } from './CategoryBadge';
 interface BatchResultsTableProps {
   predictions: PredictionResult[];
 }
@@ -27,16 +25,10 @@ export function BatchResultsTable({
                 Fruit Name
               </th>
               <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">
-                Category
+                Tag
               </th>
               <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">
                 Confidence
-              </th>
-              <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">
-                Price/Kg
-              </th>
-              <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">
-                Price/Fruit
               </th>
             </tr>
           </thead>
@@ -51,7 +43,13 @@ export function BatchResultsTable({
                   </span>
                 </td>
                 <td className="px-6 py-4">
-                  <CategoryBadge category={prediction.category} />
+                  <span className="text-sm text-gray-600">
+                    {prediction.tag === 'vegetable'
+                      ? 'Vegetable'
+                      : prediction.tag === 'fruit'
+                      ? 'Fruit'
+                      : 'Unknown'}
+                  </span>
                 </td>
                 <td className="px-6 py-4">
                   <div className="flex items-center gap-2">
@@ -61,19 +59,9 @@ export function BatchResultsTable({
                   }} />
                     </div>
                     <span className="text-sm font-semibold text-green-600">
-                      {prediction.confidence.toFixed(1)}%
+                      {prediction.confidence.toFixed(2)}%
                     </span>
                   </div>
-                </td>
-                <td className="px-6 py-4">
-                  <span className="font-semibold text-orange-600">
-                    ${prediction.priceEstimation.perKg.toFixed(2)}
-                  </span>
-                </td>
-                <td className="px-6 py-4">
-                  <span className="font-semibold text-orange-600">
-                    ${prediction.priceEstimation.perFruit.toFixed(2)}
-                  </span>
                 </td>
               </tr>)}
           </tbody>

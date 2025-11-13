@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { 
-  BarChart, Bar, LineChart, Line, PieChart, Pie, Cell,
+  BarChart, Bar, LineChart, Line,
   XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer 
 } from 'recharts';
 import { 
@@ -30,7 +30,6 @@ interface AnalyticsData {
   };
 }
 
-const COLORS = ['#10b981', '#f59e0b', '#3b82f6', '#ef4444', '#8b5cf6', '#ec4899', '#06b6d4', '#84cc16', '#f97316', '#6366f1'];
 
 export function DashboardPage() {
   const [data, setData] = useState<AnalyticsData | null>(null);
@@ -196,27 +195,26 @@ export function DashboardPage() {
 
       {/* Charts Row 2 */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Top Labels Chart */}
+        {/* Top Labels Chart - Horizontal Bar Chart */}
         <div className="bg-white rounded-xl shadow-lg p-6">
           <h3 className="text-xl font-semibold text-gray-800 mb-4">Top Predicted Fruits</h3>
           <ResponsiveContainer width="100%" height={300}>
-            <PieChart>
-              <Pie
-                data={data.top_labels}
-                dataKey="count"
-                nameKey="label"
-                cx="50%"
-                cy="50%"
-                outerRadius={100}
-                label={({ label, count }) => `${label}: ${count}`}
-              >
-                {data.top_labels.map((_, index) => (
-                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                ))}
-              </Pie>
+            <BarChart 
+              data={data.top_labels.slice().reverse()} 
+              layout="vertical"
+              margin={{ top: 5, right: 30, left: 100, bottom: 5 }}
+            >
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis type="number" />
+              <YAxis 
+                dataKey="label" 
+                type="category" 
+                width={90}
+                tick={{ fontSize: 12 }}
+              />
               <Tooltip />
-              <Legend />
-            </PieChart>
+              <Bar dataKey="count" fill="#10b981" name="Count" />
+            </BarChart>
           </ResponsiveContainer>
         </div>
 

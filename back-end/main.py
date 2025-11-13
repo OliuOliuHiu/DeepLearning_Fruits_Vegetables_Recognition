@@ -3,8 +3,8 @@ from fastapi import FastAPI, File, UploadFile, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from typing import List, Optional
 from pydantic import BaseModel
-from database import save_prediction, get_history, delete_predictions, check_duplicate, get_analytics
-from model import predict_image
+from database import save_prediction, get_history, delete_predictions, check_duplicate, get_analytics, get_unique_fruits
+from model import predict_image, get_class_names
 from PIL import Image
 import io
 from dotenv import load_dotenv
@@ -56,6 +56,7 @@ async def predict(
             image_bytes,
             result["label"],
             float(result["confidence"]),
+            result.get("tag"),
             extra={"content_type": file.content_type},
             update_existing=update_if_duplicate and is_duplicate,
         )
@@ -112,6 +113,7 @@ async def batch_predict(
                     image_bytes,
                     result["label"],
                     float(result["confidence"]),
+                    result.get("tag"),
                     extra={"content_type": file.content_type},
                     update_existing=update_if_duplicate and is_duplicate,
                 )
@@ -176,3 +178,25 @@ def analytics():
         return data
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error getting analytics: {str(e)}")
+
+
+@app.get("/fruits")
+def get_fruits():
+    """Get list of unique fruits from database."""
+    try:
+        fruits = get_unique_fruits()
+        return {"fruits": fruits}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error getting fruits: {str(e)}")
+
+
+@app.get("/labels")
+def get_labels():
+    """Get list of supported fruit labels from model (from labels.txt file)."""
+    try:
+        labels = get_class_names()
+        if labels is None:
+            return {"labels": []}
+        return {"labels": labels}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error getting labels: {str(e)}")

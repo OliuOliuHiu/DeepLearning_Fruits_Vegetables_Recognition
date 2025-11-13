@@ -51,20 +51,12 @@ upload/*
 !upload/.gitkeep
 
 # Model files (ML models - usually large)
-# NOTE: Model files are ignored because they're too large for GitHub.
-# When deploying, you need to:
-# 1. Download model files to model/ folder before building Docker image, OR
-# 2. Use Git LFS for model files (if < 2GB), OR
-# 3. Store models in cloud storage and download during deployment
-model/*.pkl
-model/*.h5
-model/*.pt
-model/*.pth
-model/*.onnx
-model/*.pb
-model/*.tflite
-model/*.joblib
-model/*.model
+# NOTE: Model directory is ignored because trained weights are large.
+# During deployment:
+# 1. Download the needed model files into model/ before building images, OR
+# 2. Use external storage (S3, GDrive, etc.) and fetch them in the deploy pipeline, OR
+# 3. Configure Git LFS if you must version small models.
+model/
 !model/.gitkeep
 
 # Logs

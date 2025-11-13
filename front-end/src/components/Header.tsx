@@ -8,11 +8,11 @@ export function Header() {
           <AppleIcon className="w-8 h-8 text-white" />
         </div>
         <h1 className="text-5xl font-bold bg-gradient-to-r from-green-600 to-orange-500 bg-clip-text text-transparent">
-          Fruit Classification AI
+          Fruit and Vegetable Recognition System
         </h1>
       </div>
       <p className="text-lg text-gray-600 dark:text-gray-400 font-medium">
-        Upload a fruit image and let AI identify it!
+        Upload a fruit or vegetable image and let Model identify it!
       </p>
     </header>
   );
