@@ -131,7 +131,15 @@ dlba/
 ├── README.md
 └── REBUILD_DOCKER.md
 ```
+---
 
+## System Architecture
+
+Below is a full-stack System Architecture: 
+
+![System Architecture](system_architecture.png)
+
+> User uploads an image from the front-end → The FastAPI back-end (running inside Docker) receives and processes the image → CNN models (TensorFlow – MobileNetV2) inside the container are invoked to generate predictions → The prediction result is stored in MongoDB (also containerized) → The front-end fetches and visualizes results and analytics.
 ---
 
 ## 📡 API quick reference
